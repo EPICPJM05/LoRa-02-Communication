@@ -1,0 +1,55 @@
+#include <SPI.h>
+#include <LoRa.h>
+#define LED 4
+#define SS 5
+#define RST 14
+#define DIO0 2
+String receivedData = "";
+void setup() {
+
+  pinMode(LED,OUTPUT);
+  Serial.begin(115200);
+  while (!Serial);
+
+  Serial.println("Starting LoRa Receiver...");
+
+  // Setup LoRa Module
+  LoRa.setPins(SS, RST, DIO0);
+  if (!LoRa.begin(433E6)) {  // Set frequency to 915 MHz
+    Serial.println("ERROR: LoRa initialization failed!");
+    while (1);  // Halt the system if LoRa fails to start
+  }
+
+  LoRa.setSpreadingFactor(7);  // Spreading Factor (7-12)
+  LoRa.setSignalBandwidth(125E3);  // Bandwidth 125 kHz
+  LoRa.setCodingRate4(5);  // Coding Rate 4/5
+
+  Serial.println("LoRa initialized successfully!");
+}
+
+void loop() {
+  int packetSize = LoRa.parsePacket();
+  if (packetSize) {
+    Serial.println("Packet received!");
+
+    receivedData = "";
+    while (LoRa.available()) {
+      receivedData += (char)LoRa.read();
+    }
+
+    Serial.print("Message: ");
+
+    Serial.println(receivedData);
+    Serial.print("RSSI: ");
+    Serial.println(LoRa.packetRssi());
+  }
+      String msg = receivedData;
+        if(msg=="Default Message: Hello, ESP32 Receiver! | Custom Message: ON"){
+         digitalWrite(LED,HIGH);
+        }else {
+          digitalWrite(LED,LOW);
+        }
+}
+
+
+//Recevier Ultrsonic Code
